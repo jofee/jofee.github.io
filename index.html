@@ -145,6 +145,77 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2022/02/22/react-native-webview%E5%8A%A0%E8%BD%BD%E6%9C%AC%E5%9C%B0Html/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="邢 枫">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/02/22/react-native-webview%E5%8A%A0%E8%BD%BD%E6%9C%AC%E5%9C%B0Html/" class="post-title-link" itemprop="url">react-native-webview加载本地Html</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-02-22 09:16:27 / 修改时间：09:56:05" itemprop="dateCreated datePublished" datetime="2022-02-22T09:16:27+08:00">2022-02-22</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>webview加载本地Html，将html、js等资源文件分别放到Android的Assets目录和ios的根目录，可以实现，但是这样造成同样的代码需要维护两份，不方便。</p>
+<p>解决方案：</p>
+<h2 id="一-RN中创建静态资源目录"><a href="#一-RN中创建静态资源目录" class="headerlink" title="一. RN中创建静态资源目录"></a>一. RN中创建静态资源目录</h2><ul>
+<li>在RN项目根目录中创建Static.bundle文件夹</li>
+<li>将独立的web应用或html文件移动到此文件夹中<h2 id="二-ios工程静态资源引入"><a href="#二-ios工程静态资源引入" class="headerlink" title="二.ios工程静态资源引入"></a>二.ios工程静态资源引入</h2></li>
+<li>xcode打开ios工程后，在以项目名称命名的第一个文件夹，右边后选择Add Files to</li>
+<li>找到第一步的Static.bundle文件夹并添加，不要勾选Copy items if need</li>
+</ul>
+<p><img src="/images/2475650-488daf09b0fc34d7.webp" alt=""></p>
+<h2 id="三-Android资源路径设置"><a href="#三-Android资源路径设置" class="headerlink" title="三.Android资源路径设置"></a>三.Android资源路径设置</h2><ul>
+<li>打开android/app/build.gradle文件，修改如下<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">android &#123; </span><br><span class="line">    ... </span><br><span class="line">    sourceSets &#123; </span><br><span class="line">        main &#123;</span><br><span class="line">        asset.srcDirs &#x3D; [&#39;src&#x2F;main&#x2F;assets&#39;, &#39;..&#x2F;..&#x2F;Static.bundle&#39;]</span><br><span class="line">    &#125; </span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="四-WebView访问本地HTML"><a href="#四-WebView访问本地HTML" class="headerlink" title="四.WebView访问本地HTML"></a>四.WebView访问本地HTML</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> source = (Platform.OS === <span class="string">'android'</span> ? <span class="string">'file:///android_asset/'</span> : <span class="string">'Static.bundle/'</span>)+<span class="string">'index.html'</span>;</span><br><span class="line"></span><br><span class="line">&lt;WebView</span><br><span class="line">    ref=&#123;webRef&#125;</span><br><span class="line">    originWhitelist=&#123;[<span class="string">'*'</span>]&#125;</span><br><span class="line">    allowFileAccess=&#123;<span class="literal">true</span>&#125;</span><br><span class="line">    source=&#123;&#123;<span class="attr">uri</span>: source&#125;&#125;</span><br><span class="line">    javaScriptEnabled=&#123;<span class="literal">true</span>&#125;</span><br><span class="line">    decelerationRate=<span class="string">'normal'</span></span><br><span class="line">    scrollEnabled=&#123;<span class="literal">true</span>&#125;</span><br><span class="line">    useWebKit=&#123;<span class="literal">true</span>&#125;</span><br><span class="line">    mediaPlaybackRequiresUserAction=&#123;<span class="literal">true</span>&#125;</span><br><span class="line">    mixedContentMode=<span class="string">"compatibility"</span></span><br><span class="line">    allowingReadAccessToURL=<span class="string">"*"</span></span><br><span class="line">    <span class="comment">// onLoadEnd=&#123;() =&gt; this.setState(&#123; loading: false &#125;)&#125;</span></span><br><span class="line">/&gt;</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2022/01/11/native%E4%BD%BF%E7%94%A8%E6%A0%B9%E8%B7%AF%E5%BE%84/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -398,7 +469,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-01-11 16:02:23" itemprop="dateModified" datetime="2022-01-11T16:02:23+08:00">2022-01-11</time>
+                <time title="修改时间：2022-02-22 09:18:36" itemprop="dateModified" datetime="2022-02-22T09:18:36+08:00">2022-02-22</time>
               </span>
 
           
@@ -422,7 +493,7 @@
 <p>输出：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">75.1</span><br></pre></td></tr></table></figure>
 
-<p>甚至做位运算也没问题</p>
+<p>做位运算也没问题</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">        String numstr=((<span class="number">0x3A</span>&amp;<span class="number">0x12</span>)&gt;&gt;<span class="number">2</span>)*<span class="number">1.2</span>+<span class="number">5.5</span>+<span class="string">""</span>;</span><br><span class="line">        System.out.println(numstr);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 <p>输出：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">10.3</span><br></pre></td></tr></table></figure>
@@ -892,7 +963,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-count">10</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
